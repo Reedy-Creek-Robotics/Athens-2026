@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,13 +11,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "teleop no pedropathing")
 public class Teleop  extends OpMode {
+    //defining motors and such
     DcMotor rfDrive, lfDrive,rbdrive, lbdrive, intake;
     DcMotorEx outtakewheel;
+
+    CRServo leftIntake, rightIntake, transfer;
 
     ElapsedTime buttonDebounce;
 
     boolean aWasClicked = false;
-    double intakespeed = 1.0;
+    double intakespeed = 1.0, outtakespeed =1.0;
+
     private boolean yWasClicked = false;
 
 
@@ -64,6 +69,14 @@ public class Teleop  extends OpMode {
         outtakewheel = hardwareMap.get(DcMotorEx.class, "outtake");
         outtakewheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         outtakewheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+
+        rightIntake = hardwareMap.get(CRServo.class, "rightIntake");
+        leftIntake = hardwareMap.get(CRServo.class, "leftIntake");
+        transfer = hardwareMap.get(CRServo.class, "transfer");
+
+        leftIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
 
@@ -80,41 +93,10 @@ public class Teleop  extends OpMode {
 
         driveBotCentric(forward, right, rotate);
 
-        if(gamepad1.a&&!aWasClicked&&buttonDebounce.milliseconds()>250){
-            intake.setPower(intakespeed);
-            buttonDebounce.reset();
-            aWasClicked = true;
-        } else if (gamepad1.a&&aWasClicked&&buttonDebounce.milliseconds()>250) {
-            intake.setPower(0);
-            buttonDebounce.reset();
-            aWasClicked = false;
-        }
+       manageIntake();
+       manageOuttake();
 
-        if(gamepad1.dpad_up&&buttonDebounce.milliseconds()>250){
-            intakespeed+=.05;
-            buttonDebounce.reset();
-        } else if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
-            intakespeed-=.05;
-            buttonDebounce.reset();
-        }
-
-        if(gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250){
-            intake.setPower(intakespeed);
-            buttonDebounce.reset();
-            yWasClicked=true;
-        } else if (gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250) {
-            intake.setPower(0);
-            buttonDebounce.reset();
-            yWasClicked=false;
-        }
-
-        if(gamepad1.right_bumper&&buttonDebounce.milliseconds()>250){
-            intakespeed+=.05;
-            buttonDebounce.reset();
-        } else if(gamepad1.left_bumper&&buttonDebounce.milliseconds()>250){
-            intakespeed-=.05;
-            buttonDebounce.reset();
-        }
+       
 
 
 
@@ -132,5 +114,50 @@ public class Teleop  extends OpMode {
         rfDrive.setPower(frontRightPower);
         lbdrive.setPower(backLeftPower);
         rbdrive.setPower(backRightPower);
+    }
+
+    private void manageOuttake(){
+        if(gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250){
+            outtakewheel.setVelocity(outtakespeed);
+            buttonDebounce.reset();
+            transfer.setPower(1);
+            yWasClicked=true;
+        } else if (gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250) {
+            outtakewheel.setVelocity(0);
+            buttonDebounce.reset();
+            transfer.setPower(0);
+            yWasClicked=false;
+        }
+
+        if(gamepad1.right_bumper&&buttonDebounce.milliseconds()>250){
+            outtakespeed+=100;
+            buttonDebounce.reset();
+        } else if(gamepad1.left_bumper&&buttonDebounce.milliseconds()>250){
+            outtakespeed-=100;
+            buttonDebounce.reset();
+        }
+
+    }
+
+    private void manageIntake(){
+        if(gamepad1.a&&!aWasClicked&&buttonDebounce.milliseconds()>250){
+            leftIntake.setPower(1);
+            rightIntake.setPower(1);
+            buttonDebounce.reset();
+            aWasClicked = true;
+        } else if (gamepad1.a&&aWasClicked&&buttonDebounce.milliseconds()>250) {
+            leftIntake.setPower(0);
+            rightIntake.setPower(0);
+            buttonDebounce.reset();
+            aWasClicked = false;
+        }
+
+        if(gamepad1.dpad_up&&buttonDebounce.milliseconds()>250){
+            intakespeed+=.05;
+            buttonDebounce.reset();
+        } else if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
+            intakespeed-=.05;
+            buttonDebounce.reset();
+        }
     }
 }
