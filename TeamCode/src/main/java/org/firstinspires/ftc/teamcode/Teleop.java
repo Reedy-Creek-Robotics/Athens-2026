@@ -20,7 +20,7 @@ public class Teleop  extends OpMode {
     ElapsedTime buttonDebounce;
 
     boolean aWasClicked = false;
-    double intakespeed = 1.0, outtakespeed =1.0;
+    double intakespeed = 1.0, outtakespeed =5000;
 
     private boolean yWasClicked = false;
 
@@ -43,13 +43,13 @@ public class Teleop  extends OpMode {
 
 
     private void initHardware() {
-        rfDrive = hardwareMap.get(DcMotor.class, "rfDrive");
+        rfDrive = hardwareMap.get(DcMotor.class, "rfdrive");
         lfDrive = hardwareMap.get(DcMotor.class, "lfdrive");
         lbdrive = hardwareMap.get(DcMotor.class, "lbdrive");
         rbdrive = hardwareMap.get(DcMotor.class, "rbdrive" );
 
-        lfDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        lbdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        rfDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        rbdrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         lfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -64,6 +64,7 @@ public class Teleop  extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         outtakewheel = hardwareMap.get(DcMotorEx.class, "outtake");
@@ -116,8 +117,8 @@ public class Teleop  extends OpMode {
         rbdrive.setPower(backRightPower);
     }
 
-    private void manageOuttake(){
-        if(gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250){
+    private void manageOuttake() {
+        if(gamepad1.y&&!yWasClicked&&buttonDebounce.milliseconds()>250){
             outtakewheel.setVelocity(outtakespeed);
             buttonDebounce.reset();
             transfer.setPower(1);
@@ -143,11 +144,13 @@ public class Teleop  extends OpMode {
         if(gamepad1.a&&!aWasClicked&&buttonDebounce.milliseconds()>250){
             leftIntake.setPower(1);
             rightIntake.setPower(1);
+            intake.setPower(intakespeed);
             buttonDebounce.reset();
             aWasClicked = true;
         } else if (gamepad1.a&&aWasClicked&&buttonDebounce.milliseconds()>250) {
             leftIntake.setPower(0);
             rightIntake.setPower(0);
+            intake.setPower(0);
             buttonDebounce.reset();
             aWasClicked = false;
         }
