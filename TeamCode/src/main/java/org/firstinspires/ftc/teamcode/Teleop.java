@@ -77,7 +77,6 @@ public class Teleop  extends OpMode {
         transfer = hardwareMap.get(CRServo.class, "transfer");
 
         leftIntake.setDirection(DcMotorSimple.Direction.REVERSE);
-        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
 
