@@ -44,9 +44,9 @@ public class Teleop  extends OpMode {
 
     private void initHardware() {
         rfDrive = hardwareMap.get(DcMotor.class, "rfdrive");
-        lfDrive = hardwareMap.get(DcMotor.class, "lfdrive");
+        lfDrive = hardwareMap.get(DcMotor.class,  "lfdrive");
         lbdrive = hardwareMap.get(DcMotor.class, "lbdrive");
-        rbdrive = hardwareMap.get(DcMotor.class, "rbdrive" );
+        rbdrive = hardwareMap.get(DcMotor.class, "rbdrive");
 
         rfDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rbdrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -97,11 +97,6 @@ public class Teleop  extends OpMode {
        manageIntake();
        manageOuttake();
 
-       
-
-
-
-
 
     }
 
@@ -121,13 +116,17 @@ public class Teleop  extends OpMode {
         if(gamepad1.y&&!yWasClicked&&buttonDebounce.milliseconds()>250){
             outtakewheel.setVelocity(outtakespeed);
             buttonDebounce.reset();
-            transfer.setPower(1);
             yWasClicked=true;
         } else if (gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250) {
             outtakewheel.setVelocity(0);
             buttonDebounce.reset();
-            transfer.setPower(0);
             yWasClicked=false;
+        }
+        if(gamepad1.x) {
+            transfer.setPower(-1);
+        }
+        else {
+            transfer.setPower(0);
         }
 
         if(gamepad1.right_bumper&&buttonDebounce.milliseconds()>250){
