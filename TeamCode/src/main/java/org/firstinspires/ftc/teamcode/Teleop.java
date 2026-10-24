@@ -20,9 +20,13 @@ public class Teleop  extends OpMode {
     ElapsedTime buttonDebounce;
 
     boolean aWasClicked = false;
-    double intakespeed = 1.0, outtakespeed =5000;
+    double intakespeed = 1.0, outtakespeed =2800;
+
+    boolean intake_running = false, outtake_running = false, transfer_running = false;
 
     private boolean yWasClicked = false;
+    private double transfer_power = 0;
+    private boolean DpaddDownBefore=false;
 
 
     @Override
@@ -75,6 +79,7 @@ public class Teleop  extends OpMode {
         rightIntake = hardwareMap.get(CRServo.class, "rightIntake");
         leftIntake = hardwareMap.get(CRServo.class, "leftIntake");
         transfer = hardwareMap.get(CRServo.class, "transfer");
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
 
         leftIntake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -83,6 +88,8 @@ public class Teleop  extends OpMode {
 
     private void manageTelemetry(){
         telemetry.addData("working", true);
+        telemetry.addData("Intake Speed", intakespeed);
+        telemetry.addData("Outtake Speed", outtakespeed);
         telemetry.update();
     }
 
@@ -93,10 +100,82 @@ public class Teleop  extends OpMode {
 
         driveBotCentric(forward, right, rotate);
 
-       manageIntake();
-       manageOuttake();
+
+        manageIntake();
+        manageOuttake();
+        manageTransfer();
+
+        if(intake_running)
+            intake.setPower(intakespeed);
+        if(outtake_running)
+            outtakewheel.setVelocity(outtakespeed);
+
+        if (gamepad1.x){
+            outtake_running=false;
+            intake_running=false;
+            transfer_running=false;
+        }
+        if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
+            outtakewheel.setVelocity(-outtakespeed);
+            transfer.setPower(-1);
+            intake.setPower(-1);
+            buttonDebounce.reset();
+        }
+        if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
+            outtakewheel.setVelocity(0);
+            transfer.setPower(0);
+            intake.setPower(0);
+            buttonDebounce.reset();
+        }
+
+    }
+
+    private void manageTransfer() {
+        if(gamepad1.b){
+            transfer_running = true;
+            transfer.setPower(-1);
+        }else if(gamepad1.y){
+            transfer.setPower(1);
+            transfer_running=false;
+        }else{
+            transfer.setPower(0);
+        }
 
 
+
+    }
+
+    private void manageOuttake() {
+        if(gamepad1.a&&buttonDebounce.milliseconds()>250){
+            outtake_running = !outtake_running;
+            buttonDebounce.reset();
+        }
+        if(gamepad1.dpadLeftWasPressed()){
+            outtakewheel.setVelocity(-outtakespeed);
+        }
+        if(gamepad1.dpadLeftWasReleased()){
+            outtakewheel.setVelocity(0);
+        }
+        if(gamepad1.left_bumper&&buttonDebounce.milliseconds()>200){
+            outtakespeed-=300;
+            buttonDebounce.reset();
+        }
+        if (gamepad1.right_bumper&&buttonDebounce.milliseconds()>200) {
+            outtakespeed+=300;
+            buttonDebounce.reset();
+        }
+    }
+
+    private void manageIntake() {
+        if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>200&&!DpaddDownBefore){
+            intake_running = !intake_running;
+            buttonDebounce.reset();
+        }
+        if(gamepad1.dpadDownWasPressed()){
+            intake.setPower(-1);
+        } else if (gamepad1.dpadDownWasReleased()) {
+            intake.setPower(0);
+        }
     }
 
     private void driveBotCentric(double forward,  double right, double rotate) {
@@ -111,54 +190,4 @@ public class Teleop  extends OpMode {
         rbdrive.setPower(backRightPower);
     }
 
-    private void manageOuttake() {
-        if(gamepad1.y&&!yWasClicked&&buttonDebounce.milliseconds()>250){
-            outtakewheel.setVelocity(outtakespeed);
-            buttonDebounce.reset();
-            yWasClicked=true;
-        } else if (gamepad1.y&&yWasClicked&&buttonDebounce.milliseconds()>250) {
-            outtakewheel.setVelocity(0);
-            buttonDebounce.reset();
-            yWasClicked=false;
-        }
-        if(gamepad1.x) {
-            transfer.setPower(-1);
-        }
-        else {
-            transfer.setPower(0);
-        }
-
-        if(gamepad1.right_bumper&&buttonDebounce.milliseconds()>250){
-            outtakespeed+=100;
-            buttonDebounce.reset();
-        } else if(gamepad1.left_bumper&&buttonDebounce.milliseconds()>250){
-            outtakespeed-=100;
-            buttonDebounce.reset();
-        }
-
-    }
-
-    private void manageIntake(){
-        if(gamepad1.a&&!aWasClicked&&buttonDebounce.milliseconds()>250){
-            leftIntake.setPower(1);
-            rightIntake.setPower(1);
-            intake.setPower(intakespeed);
-            buttonDebounce.reset();
-            aWasClicked = true;
-        } else if (gamepad1.a&&aWasClicked&&buttonDebounce.milliseconds()>250) {
-            leftIntake.setPower(0);
-            rightIntake.setPower(0);
-            intake.setPower(0);
-            buttonDebounce.reset();
-            aWasClicked = false;
-        }
-
-        if(gamepad1.dpad_up&&buttonDebounce.milliseconds()>250){
-            intakespeed+=.05;
-            buttonDebounce.reset();
-        } else if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
-            intakespeed-=.05;
-            buttonDebounce.reset();
-        }
-    }
 }
