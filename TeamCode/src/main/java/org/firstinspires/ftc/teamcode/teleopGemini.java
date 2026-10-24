@@ -151,12 +151,12 @@ public class teleopGemini extends OpMode {
 
         // Bumpers adjust the target velocity once per press
         if (gamepad1.left_bumper && !leftBumperWasPressed) {
-            outtakespeed = Math.max(0, outtakespeed - 300);
+            outtakespeed = Math.max(0, outtakespeed - 150);
         }
         leftBumperWasPressed = gamepad1.left_bumper;
 
         if (gamepad1.right_bumper && !rightBumperWasPressed) {
-            outtakespeed += 300;
+            outtakespeed += 150;
         }
         rightBumperWasPressed = gamepad1.right_bumper;
 
