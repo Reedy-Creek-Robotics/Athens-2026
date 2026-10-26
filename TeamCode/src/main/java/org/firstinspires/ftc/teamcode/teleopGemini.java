@@ -23,7 +23,7 @@ public class teleopGemini extends OpMode {
 
     // Speeds
     private double intakespeed = 0.5;
-    private double outtakespeed = 2800;
+    private double outtakespeed = 1300;
 
     // Toggle states
     private boolean intake_running = false;
@@ -151,12 +151,12 @@ public class teleopGemini extends OpMode {
 
         // Bumpers adjust the target velocity once per press
         if (gamepad1.left_bumper && !leftBumperWasPressed) {
-            outtakespeed = Math.max(0, outtakespeed - 150);
+            outtakespeed = Math.max(0, outtakespeed - 50);
         }
         leftBumperWasPressed = gamepad1.left_bumper;
 
         if (gamepad1.right_bumper && !rightBumperWasPressed) {
-            outtakespeed += 150;
+            outtakespeed += 50;
         }
         rightBumperWasPressed = gamepad1.right_bumper;
 
