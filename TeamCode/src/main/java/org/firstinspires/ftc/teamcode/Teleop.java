@@ -27,11 +27,12 @@ public class Teleop  extends OpMode {
     private boolean yWasClicked = false;
     private double transfer_power = 0;
     private boolean DpaddDownBefore=false;
+    Bot robot;
 
 
     @Override
     public void init() {
-        initHardware();
+        robot = new Bot(hardwareMap);
         buttonDebounce  = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         buttonDebounce.reset();
     }
@@ -45,82 +46,23 @@ public class Teleop  extends OpMode {
     }
 
 
-
-    private void initHardware() {
-        rfDrive = hardwareMap.get(DcMotor.class, "rfdrive");
-        lfDrive = hardwareMap.get(DcMotor.class,  "lfdrive");
-        lbdrive = hardwareMap.get(DcMotor.class, "lbdrive");
-        rbdrive = hardwareMap.get(DcMotor.class, "rbdrive");
-
-        rfDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        rbdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        lfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lbdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rbdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        lfDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rfDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lbdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rbdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
-        outtakewheel = hardwareMap.get(DcMotorEx.class, "outtake");
-        outtakewheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        outtakewheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-
-        rightIntake = hardwareMap.get(CRServo.class, "rightIntake");
-        leftIntake = hardwareMap.get(CRServo.class, "leftIntake");
-        transfer = hardwareMap.get(CRServo.class, "transfer");
-        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        leftIntake.setDirection(DcMotorSimple.Direction.REVERSE);
-    }
-
-
-
     private void manageTelemetry(){
         telemetry.addData("working", true);
         telemetry.addData("Intake Speed", intakespeed);
-        telemetry.addData("Outtake Speed", outtakespeed);
+        telemetry.addData("Outtake Speed", robot.getOuttakeSpeed());
+        telemetry.addData("Target Outtake", outtakespeed);
         telemetry.update();
     }
 
-    private void manageDriving(){
-        double forward =-gamepad1.left_stick_y;
+    private void manageDriving() {
+        double forward = -gamepad1.left_stick_y;
         double right = gamepad1.left_stick_x;
         double rotate = gamepad1.right_stick_x;
 
-        driveBotCentric(forward, right, rotate);
+        robot.drive(forward, right, rotate);
 
 
-        manageIntake();
-        manageOuttake();
-        manageTransfer();
 
-        if(intake_running)
-            intake.setPower(intakespeed);
-        if(outtake_running)
-            outtakewheel.setVelocity(outtakespeed);
-
-        if (gamepad1.x){
-            outtake_running=false;
-            intake_running=false;
-            transfer_running=false;
-        }
-        if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
-            outtakewheel.setVelocity(-outtakespeed);
-            transfer.setPower(-1);
-            intake.setPower(-1);
-            buttonDebounce.reset();
-        }
         if(gamepad1.dpad_down&&buttonDebounce.milliseconds()>250){
             outtakewheel.setVelocity(0);
             transfer.setPower(0);
