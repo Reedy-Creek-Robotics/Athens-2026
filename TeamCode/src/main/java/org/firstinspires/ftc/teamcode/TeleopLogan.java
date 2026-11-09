@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "TeleOp ALT no PP")
-public class TeleopALT_Layout extends OpMode {
+@TeleOp(name = "TeleOp Logan")
+public class TeleopLogan extends OpMode {
 
     // Drive motors
     private DcMotor rfDrive, lfDrive, rbdrive, lbdrive;
@@ -142,7 +142,7 @@ public class TeleopALT_Layout extends OpMode {
 
         // Left bumper: decrease speed by 50
         if (gamepad1.left_bumper && !leftBumperWasPressed) {
-            outtakespeed = Math.max(0, outtakespeed - 50);
+            outtakespeed -= 50;
         }
         leftBumperWasPressed = gamepad1.left_bumper;
 
@@ -165,13 +165,13 @@ public class TeleopALT_Layout extends OpMode {
     private void manageTransfer() {
         // D-pad left: toggle forward transfer
         if (gamepad1.dpad_left && !dpadLeftWasPressed) {
-            transferMode = (transferMode == 1) ? 0 : 1;
+            transferMode = (transferMode == -1) ? 0 : -1;
         }
         dpadLeftWasPressed = gamepad1.dpad_left;
 
         // D-pad right: toggle reverse transfer
         if (gamepad1.dpad_right && !dpadRightWasPressed) {
-            transferMode = (transferMode == -1) ? 0 : -1;
+            transferMode = (transferMode == 1) ? 0 : 1;
         }
         dpadRightWasPressed = gamepad1.dpad_right;
 
@@ -206,6 +206,7 @@ public class TeleopALT_Layout extends OpMode {
         telemetry.addData("Flywheel Running", outtake_running);
         telemetry.addData("Flywheel Target Velocity", outtakespeed);
         telemetry.addData("Reverse Flywheel", gamepad1.b);
+        telemetry.addData("Flywheel Actual Velocity", outtakewheel.getVelocity());
         telemetry.update();
     }
 
