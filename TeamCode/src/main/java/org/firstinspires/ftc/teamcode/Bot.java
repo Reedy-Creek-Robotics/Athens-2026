@@ -12,8 +12,6 @@ public class Bot {
     HardwareMap hardwareMap;
 
     // Drive motors
-    public DcMotor rfDrive, lfDrive, rbdrive, lbdrive;
-
     // Mechanism motors
     private DcMotor intake;
     private DcMotorEx outtakewheel;
@@ -30,30 +28,14 @@ public class Bot {
     private boolean intakeRunning= false;
 
 
-    public Bot(HardwareMap hardwareMap){
+    public Bot(HardwareMap hardwareMap, Follower follower){
         this.hardwareMap = hardwareMap;
+        this.follower = follower;
         initHardware();
 
     }
 
     private void initHardware() {
-        rfDrive = hardwareMap.get(DcMotor.class, "rfdrive");
-        lfDrive = hardwareMap.get(DcMotor.class, "lfdrive");
-        rbdrive = hardwareMap.get(DcMotor.class, "rbdrive");
-        lbdrive = hardwareMap.get(DcMotor.class, "lbdrive");
-
-        rfDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        rbdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        lfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lbdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rbdrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        lfDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rfDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lbdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rbdrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intake = hardwareMap.get(DcMotor.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -83,6 +65,8 @@ public class Bot {
 
     public void run_intake(boolean reverse){
         intake.setPower(reverse? (-intakeSpeed):intakeSpeed);
+        leftIntake.setPower(reverse? (-intakeSpeed):intakeSpeed);
+        rightIntake.setPower(reverse? (-intakeSpeed):intakeSpeed);
         intakeRunning=true;
     }
 
@@ -95,19 +79,13 @@ public class Bot {
     }
     public void stop_intake(){
         intake.setPower(0);
+        leftIntake.setPower(0);
+        rightIntake.setPower(0);
         intakeRunning=false;
     }
 
     public void drive(double forward,  double right, double rotate){
-        double frontLeftPower = forward + right + rotate;
-        double frontRightPower = forward- right- rotate;
-        double backLeftPower = forward- right + rotate;
-        double backRightPower = forward + right- rotate;
-
-        lfDrive.setPower(frontLeftPower);
-        rfDrive.setPower(frontRightPower);
-        lbdrive.setPower(backLeftPower);
-        rbdrive.setPower(backRightPower);
+        follower.manual(forward,right, rotate);
     }
 
 
@@ -117,6 +95,13 @@ public class Bot {
 
 
     public boolean isIntakeRunning() {
-        return false;
+        return intakeRunning;
+    }
+
+
+    public void stopAll(){
+        this.stop_intake();
+        this.run_outtake(0);
+        this.stop_transfer();
     }
 }

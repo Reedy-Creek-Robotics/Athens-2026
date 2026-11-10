@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -8,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.pedro.Constants;
 
 @TeleOp(name = "teleop no pedropathing")
 public class Teleop  extends OpMode {
@@ -28,11 +31,14 @@ public class Teleop  extends OpMode {
     private double transfer_power = 0;
     private boolean DpaddDownBefore=false;
     Bot robot;
+    Follower follower;
 
 
     @Override
     public void init() {
-        robot = new Bot(hardwareMap);
+        follower = Constants.create(hardwareMap);
+
+        robot = new Bot(hardwareMap,follower);
         buttonDebounce  = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         buttonDebounce.reset();
     }
