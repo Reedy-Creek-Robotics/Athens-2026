@@ -71,7 +71,7 @@ public class Bot {
     }
 
     public void run_transfer(boolean reverse){
-        transfer.setPower(reverse? (-transferSpeed):transferSpeed);
+        transfer.setPower(reverse? (transferSpeed):-.7*transferSpeed);
     }
     
     public void stop_transfer(){

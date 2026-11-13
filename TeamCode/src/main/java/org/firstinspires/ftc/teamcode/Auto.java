@@ -18,27 +18,30 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.math.Pose;
 import com.pedropathing.paths.Path;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedro.Constants;
-
+@Autonomous(name = "Auto")
 public class Auto extends OpMode {
     Bot robot;
 
-    int targetOuttake = 1500;
+    int targetOuttake = 1350;
 
     private final PoseFactory poseFactory = PoseFactory.degrees();
 
     private final Pose start = poseFactory.of(56, 8, 270);
     private final Pose launch1 = poseFactory.of(56, 36, 90);
-    private final Pose pickupSeg1 = poseFactory.of(8.7, 14.8469, -90);
+    private final Pose pickupSeg1 = poseFactory.of(9, 24, -90);
     private final Pose pickupSeg1Segment1Start = poseFactory.of(8.7, 14.8469, 90);
     private final Pose pickupSeg1Segment1End = poseFactory.of(8.7, 14.8469, 270);
     private final Pose pickupSeg1Segment2Heading = poseFactory.of(8.7, 14.8469, -90);
-    private final Pose pickupSeg2 = poseFactory.of(8.7, 9.3, 270);
+    private final Pose pickupSeg2 = poseFactory.of(7.2, 8.7, 270);
     private final Pose launch2Start = poseFactory.of(8.7, 9.3, 270);
-    private final Pose launch2 = poseFactory.of(56, 108, 270);
-    private final Pose launch2Control1 = poseFactory.of(78, 7.5, 0);
+    private final Pose launch2 = poseFactory.of(56, 106, 90);
+    private final Pose launch2Control1 = poseFactory.of(120, 7.5, 0);
+
+    private final Pose launch2control2 = poseFactory.of(68,96,0);
     private Follower follower;
 
     @Override
@@ -83,7 +86,7 @@ public class Auto extends OpMode {
     }
 
     public Path launch2() {
-        return curve(launch2Start, launch2Control1, launch2).linear(launch2Start, launch2);
+        return curve(launch2Start, launch2Control1, launch2control2, launch2).linear(launch2Start, launch2);
     }
 
     public Command runOuttakeWheel(int speed){
@@ -91,7 +94,7 @@ public class Auto extends OpMode {
                 .setStart(()->
                         robot.run_outtake(speed)
                 )
-                .setDone(()->Math.abs(robot.getOuttakeSpeed()-speed) < 40)
+                .setDone(()->Math.abs(robot.getOuttakeSpeed()-speed) < 20)
                 .requiring(robot);
     }
 
@@ -116,8 +119,10 @@ public class Auto extends OpMode {
         return sequential(
                 runOuttakeWheel(targetOuttake),
                 runTransfer(),
-                waitMs(5000),
+                manageIntake(),
+                waitMs(7000),
                 instant(()->robot.stop_transfer()),
+                manageIntake(),
                 instant(()->robot.run_outtake(0))
         );
     }
@@ -128,7 +133,7 @@ public class Auto extends OpMode {
                 follow(follower, pickupSeg1()),
                 manageIntake(),
                 follow(follower,pickupSeg2()),
-                waitMs(1000),
+                waitMs(5000),
                 manageIntake(),
                 follow(follower, launch2()),
                 outtake()
